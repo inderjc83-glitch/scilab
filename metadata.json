@@ -1,0 +1,6 @@
+{
+  "name": "SciLab",
+  "description": "Real-time science experiment platform with live telemetry graphs, collaborative research, teacher dashboard, end-to-end encryption, and quiz games.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
