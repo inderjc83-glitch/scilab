@@ -23,6 +23,7 @@ data class UserProfile(
     val id: String = "user_001",
     val name: String = "Alex Rivera",
     val email: String = "alex.rivera@student.edu",
+    val institution: String = "Department of Natural Sciences",
     val role: UserRole = UserRole.STUDENT,
     val isMfaEnabled: Boolean = true,
     val isSubscribed: Boolean = true,

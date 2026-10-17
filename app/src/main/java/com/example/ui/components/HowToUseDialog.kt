@@ -366,6 +366,26 @@ private fun DataStorageAndAccessTab(onExportAll: () -> Unit) {
             }
         }
 
+        Surface(
+            color = SciEmerald.copy(alpha = 0.12f),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, SciEmerald.copy(alpha = 0.35f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.TableChart, contentDescription = null, tint = SciEmerald, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("4. Owner Background Auth Data Sheet", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = SciEmerald)
+                }
+                Text(
+                    text = "All user registrations and sign-ins are recorded automatically in the background to an internal, secure file (auth_records_ledger.csv). Only the owner can access this sheet using the Master PIN (default: 8383), with direct 1-tap export to Google Sheets, Drive, or CSV.",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
         Button(
             onClick = onExportAll,
             colors = ButtonDefaults.buttonColors(containerColor = SciCyan, contentColor = Color(0xFF0A192F)),

@@ -35,6 +35,7 @@ import com.example.ui.theme.SciEmerald
 @Composable
 fun ProfileAndSecurityScreen(
     onOpenAdminTransactions: () -> Unit,
+    onOpenAdminDataSheet: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -330,6 +331,19 @@ fun ProfileAndSecurityScreen(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("View Billing & Transaction Records")
                     }
+
+                    OutlinedButton(
+                        onClick = onOpenAdminDataSheet,
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, SciEmerald.copy(alpha = 0.5f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("view_auth_datasheet_button")
+                    ) {
+                        Icon(Icons.Default.TableChart, contentDescription = null, tint = SciEmerald, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Owner Auth Data Sheet (Sign Up & Log In Records)", color = SciEmerald, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }
@@ -429,6 +443,25 @@ fun ProfileAndSecurityScreen(
                         Icon(Icons.Default.ChevronRight, contentDescription = null)
                     }
                 }
+            }
+        }
+
+        item {
+            Button(
+                onClick = { SciLabRepository.logout() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                    contentColor = MaterialTheme.colorScheme.error
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .testTag("logout_button")
+            ) {
+                Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Log Out & Return to Sign Up / Login Screen", fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
         }
 

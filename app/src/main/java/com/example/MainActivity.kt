@@ -18,10 +18,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.AuthDataSheetManager
 import com.example.data.SciLabRepository
 import com.example.i18n.StringsLocalization
 import com.example.model.PaymentTransaction
 import com.example.model.UserRole
+import com.example.ui.components.AdminPinDialog
 import com.example.ui.components.HowToUseDialog
 import com.example.ui.components.PaymentCheckoutDialog
 import com.example.ui.components.ReceiptDialog
@@ -36,12 +38,15 @@ enum class AppNavDestination {
     QUIZ,
     PROFILE,
     EXPERIMENT_DETAIL,
-    ADMIN_TRANSACTIONS
+    ADMIN_TRANSACTIONS,
+    ADMIN_DATA_SHEET
 }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AuthDataSheetManager.init(this)
+        SciLabRepository.initContext(this)
         enableEdgeToEdge()
         setContent {
             val isDarkMode by SciLabRepository.isDarkMode.collectAsState()
@@ -71,11 +76,12 @@ fun SciLabMainApp() {
 
     var showUpgradeCheckout by remember { mutableStateOf(false) }
     var showHowToUseDialog by remember { mutableStateOf(false) }
+    var showAdminPinDialog by remember { mutableStateOf(false) }
     var latestReceipt by remember { mutableStateOf<PaymentTransaction?>(null) }
 
     // System BackHandler
     BackHandler(enabled = currentScreen != AppNavDestination.DASHBOARD) {
-        if (currentScreen == AppNavDestination.ADMIN_TRANSACTIONS) {
+        if (currentScreen == AppNavDestination.ADMIN_TRANSACTIONS || currentScreen == AppNavDestination.ADMIN_DATA_SHEET) {
             currentScreen = AppNavDestination.PROFILE
         } else {
             currentScreen = AppNavDestination.DASHBOARD
@@ -84,7 +90,9 @@ fun SciLabMainApp() {
 
     Scaffold(
         topBar = {
-            if (currentScreen != AppNavDestination.EXPERIMENT_DETAIL && currentScreen != AppNavDestination.ADMIN_TRANSACTIONS) {
+            if (currentScreen != AppNavDestination.EXPERIMENT_DETAIL && 
+                currentScreen != AppNavDestination.ADMIN_TRANSACTIONS && 
+                currentScreen != AppNavDestination.ADMIN_DATA_SHEET) {
                 TopAppBar(
                     title = {
                         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
@@ -177,6 +185,21 @@ fun SciLabMainApp() {
                             )
                         }
 
+                        // Logout Button (returns to Sign Up / Login screen)
+                        IconButton(
+                            onClick = { SciLabRepository.logout() },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .testTag("topbar_logout_button")
+                        ) {
+                            Icon(
+                                Icons.Default.Logout,
+                                contentDescription = "Log out",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(19.dp)
+                            )
+                        }
+
                         // Upgrade chip if not subscribed
                         if (!userProfile.isSubscribed) {
                             Surface(
@@ -213,7 +236,9 @@ fun SciLabMainApp() {
             }
         },
         bottomBar = {
-            if (currentScreen != AppNavDestination.EXPERIMENT_DETAIL && currentScreen != AppNavDestination.ADMIN_TRANSACTIONS) {
+            if (currentScreen != AppNavDestination.EXPERIMENT_DETAIL && 
+                currentScreen != AppNavDestination.ADMIN_TRANSACTIONS && 
+                currentScreen != AppNavDestination.ADMIN_DATA_SHEET) {
                 NavigationBar(
                     windowInsets = WindowInsets.navigationBars,
                     containerColor = MaterialTheme.colorScheme.surface
@@ -309,11 +334,17 @@ fun SciLabMainApp() {
                 }
                 AppNavDestination.PROFILE -> {
                     ProfileAndSecurityScreen(
-                        onOpenAdminTransactions = { currentScreen = AppNavDestination.ADMIN_TRANSACTIONS }
+                        onOpenAdminTransactions = { currentScreen = AppNavDestination.ADMIN_TRANSACTIONS },
+                        onOpenAdminDataSheet = { showAdminPinDialog = true }
                     )
                 }
                 AppNavDestination.ADMIN_TRANSACTIONS -> {
                     AdminTransactionsScreen(
+                        onBack = { currentScreen = AppNavDestination.PROFILE }
+                    )
+                }
+                AppNavDestination.ADMIN_DATA_SHEET -> {
+                    AdminDataSheetScreen(
                         onBack = { currentScreen = AppNavDestination.PROFILE }
                     )
                 }
@@ -335,6 +366,16 @@ fun SciLabMainApp() {
     if (showHowToUseDialog) {
         HowToUseDialog(
             onDismiss = { showHowToUseDialog = false }
+        )
+    }
+
+    if (showAdminPinDialog) {
+        AdminPinDialog(
+            onPinCorrect = {
+                showAdminPinDialog = false
+                currentScreen = AppNavDestination.ADMIN_DATA_SHEET
+            },
+            onDismiss = { showAdminPinDialog = false }
         )
     }
 

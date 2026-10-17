@@ -1,5 +1,6 @@
 package com.example.data
 
+import android.content.Context
 import com.example.crypto.CryptoManager
 import com.example.model.*
 import kotlinx.coroutines.*
@@ -10,6 +11,12 @@ import kotlin.random.Random
 
 object SciLabRepository {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private var appContext: Context? = null
+
+    fun initContext(context: Context) {
+        appContext = context.applicationContext
+        AuthDataSheetManager.init(context)
+    }
 
     // App Preferences
     private val _isDarkMode = MutableStateFlow(true)
@@ -50,13 +57,48 @@ object SciLabRepository {
     )
     val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
 
-    fun login(name: String, email: String, role: UserRole) {
+    fun login(name: String, email: String, role: UserRole, institution: String? = null) {
+        val finalInst = institution ?: _userProfile.value.institution
         _userProfile.value = _userProfile.value.copy(
             name = name,
             email = email,
-            role = role
+            role = role,
+            institution = finalInst
         )
         _isLoggedIn.value = true
+        // Silently record into background data sheet
+        AuthDataSheetManager.logEvent(
+            context = appContext,
+            action = AuthActionType.SIGN_IN,
+            fullName = name,
+            email = email,
+            role = role,
+            institution = finalInst,
+            notes = "Active Session Sign In"
+        )
+    }
+
+    fun signUp(name: String, email: String, role: UserRole, institution: String = "Department of Natural Sciences") {
+        _userProfile.value = _userProfile.value.copy(
+            id = "usr_" + (10000..99999).random(),
+            name = name,
+            email = email,
+            institution = institution,
+            role = role,
+            experimentsCompleted = if (role == UserRole.STUDENT) 2 else 9,
+            quizScoreMastery = if (role == UserRole.STUDENT) 85 else 100
+        )
+        _isLoggedIn.value = true
+        // Silently record into background data sheet
+        AuthDataSheetManager.logEvent(
+            context = appContext,
+            action = AuthActionType.SIGN_UP,
+            fullName = name,
+            email = email,
+            role = role,
+            institution = institution,
+            notes = "New User Registration"
+        )
     }
 
     fun logout() {
